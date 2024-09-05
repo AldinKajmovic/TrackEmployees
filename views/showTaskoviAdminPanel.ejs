@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+<div class="container mt-5" id="tabela">
+    <table class="table table-striped">
+        <thead class="bg-dark text-white">
+        <tr>
+            <th>ID</th>
+            <th>Naziv</th>
+            <th>Opis</th>
+            <th>ID projekta</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody id="tabelaProjekata">
+        <% for (let i = 0; i < taskData.length; i++) { %>
+            <tr id="red<%= taskData[i].id_taska %>">
+                <td><%= taskData[i].id_taska %></td>
+                <td id="naziv<%= taskData[i].id_taska %>"><%= taskData[i].naziv %></td>
+                <td id="datum<%= taskData[i].id_taska %>"><%= taskData[i].opis %></td>
+                <td id="rok<%= taskData[i].id_taska %>"><%= taskData[i].id_projekta %></td>
+                <td id="status<%= taskData[i].id_taska %>"><%= taskData[i].status_taska %></td>
+
+            </tr>
+        <% } %>
+        </tbody>
+    </table>
+</div>
+
+
+<div class="container mt-5">
+    <h2>Izmjena stanja taska</h2>
+    <form method="post" action="/adminPanel/azurirajStanjeTaska" id="formAzurirajTask">
+
+        <label for="selectTask" class="form-label">ID Taska:</label>
+        <select id="selectTask" class="form-select" name="selectTask">
+            <option selected>Otvori meni</option>
+            <% for (let i = 0; i < taskData.length; i++) { %>
+                <option value="<%= taskData[i].id_taska %>">ID: <%= taskData[i].id_taska %>, Naziv
+                    taska: <%= taskData[i].naziv %> </option>
+            <% } %>
+
+        </select>
+        <div class="mb-3">
+            <label for="statusTaska" class="form-label">Status:</label>
+            <select class="form-select" id="statusTaska" required name="statusTaska">
+                <option value="" disabled selected>Odaberite status</option>
+                <option value="U toku">U toku</option>
+                <option value="Završen">Završen</option>
+                <option value="Kasni">Kasni</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Ažuriraj stanje</button>
+    </form>
+</div>
+
+
+<script>
+    $('#formAzurirajTask').on('submit', function (event) {
+        event.preventDefault();
+
+        $.ajax({
+            url: "/adminPanel/azurirajStanjeTaska",
+            method: "POST",
+            data: $(this).serialize(),
+            success: function (data) {
+                if (data.success) {
+                    var selectedTaskID = $('#selectTask').val();
+                    var updatedStatus = $('#statusTaska').val();
+
+                    var rowId = "#red" + selectedTaskID;
+
+                    $(rowId + ' #status' + selectedTaskID).text(updatedStatus);
+                } else {
+                    console.log("Server response indicates failure");
+                    alert("Failed to update project status. Error: " + data.error);
+                }
+            },
+            error: function (err) {
+                console.log("Ajax request error:", err);
+                alert("An unexpected error occurred. Please try again later.");
+            }
+        });
+    });
+</script>
+</body>
+</html>

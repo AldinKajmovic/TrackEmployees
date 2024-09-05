@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin panel</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+<body>
+
+<div class="container mt-5" id="tabela">
+    <table class="table table-striped">
+        <thead class="bg-dark text-white">
+        <tr class="text-center">
+            <th>ID</th>
+            <th>Ime</th>
+            <th>Prezime</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Tip korisnika</th>
+            <th>ID nadređenog</th>
+            <th>Modifikuj</th>
+        </tr>
+        </thead>
+        <!--Svi se mogu modifikovati osim admina, zbog toga je i != 0 -->
+        <tbody id="tabelaKorisnika">
+        <% for (let i = 0; i < podaci.length; i++) { %>
+            <tr id="red<%= podaci[i].id %>">
+                <td><%= podaci[i].id %></td>
+                <td id="ime<%= podaci[i].id %>"><%= podaci[i].ime %></td>
+                <td id="prezime<%= podaci[i].id %>"><%= podaci[i].prezime %></td>
+                <td id="username<%= podaci[i].id %>"><%= podaci[i].username %></td>
+                <td id="password<%= podaci[i].id %>"><%= podaci[i].password %></td>
+                <td id="tip<%= podaci[i].id %>"><%= podaci[i].tip_korisnika %></td>
+                <td id="nadredjeni<%= podaci[i].id %>">
+                    <% if (podaci[i].id_nadredjeni !== null) { %>
+                        <%= podaci[i].id_nadredjeni %>
+                    <% } else { %>
+                        null
+                    <% } %>
+                </td>
+                <% if (i != 0) { %>
+                    <td>
+                        <button type="button" class="btn btn-danger" onclick="obrisi(<%= podaci[i].id %>)">Briši
+                        </button>
+                    </td>
+                <% } %>
+            </tr>
+        <% } %>
+
+        </tbody>
+    </table>
+</div>
+
+
+<div class="modal fade" id="modalDodajProjekat" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDodajProjekatLabel">Dodaj projekt</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formaProjekta" method="POST" class="mx-auto mt-4" style="max-width: 400px;">
+                    <div class="mb-3">
+                        <label for="naziv" class="form-label">Naziv projekta:</label>
+                        <input type="text" class="form-control" id="naziv" name="naziv" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="opis" class="form-label">Opis projekta:</label>
+                        <textarea class="form-control" id="opis" name="opis" rows="4" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="startniDatum" class="form-label">Startni datum:</label>
+                        <input type="date" class="form-control" id="startniDatum" name="startniDatum" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="zavrsniDatum" class="form-label">Završni datum:</label>
+                        <input type="date" class="form-control" id="zavrsniDatum" name="zavrsniDatum" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="selectMenadzera" class="form-label">ID menadžera:</label>
+                        <select id="selectMenadzera" class="form-select" name="idMenadzer" required>
+                            <option selected>Izaberi korisnika</option>
+                            <% for (let i = 0; i < podaci.length; i++) { %>
+                                <option value="<%= podaci[i].id %>">ID: <%= podaci[i].id %>,
+                                    username: <%= podaci[i].username %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="selectKlijenta" class="form-label">ID klijenta:</label>
+                        <select id="selectKlijenta" class="form-select" name="selectKlijenta" required>
+                            <option selected>Izaberi klijenta</option>
+                            <% for (let i = 0; i < podaciKlijenta.length; i++) { %>
+                                <option value="<%= podaciKlijenta[i].id_klijenta %>">
+                                    ID: <%= podaciKlijenta[i].id_klijenta %> <%= podaciKlijenta[i].ime %> <%= podaciKlijenta[i].prezime %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+
+                    <button type="submit" class="btn btn-primary">Dodaj projekt</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDodjeliProjekat" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDodjeliProjekatLabel">Dodijeli projekat</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formaDodjeliProjekat" action="/adminPanel/dodijeliProjekt" method="post" class="mx-auto mt-4"
+                      style="max-width: 400px;">
+
+                    <label for="selectProjekt" class="form-label">ID projekta:</label>
+                    <select id="selectProjekt" class="form-select" name="selectProjekt">
+                        <option selected>Otvori meni</option>
+                        <% for (let i = 0; i < projekti.length; i++) { %>
+                            <option value="<%= projekti[i].id_projekta %>">ID: <%= projekti[i].id_projekta %>, Naziv
+                                projekta: <%= projekti[i].naziv_projekta %> </option>
+                        <% } %>
+                    </select>
+
+                    <label for="selectRadnika" class="form-label">ID radnika:</label>
+                    <select id="selectRadnika" class="form-select" name="selectRadnika">
+                        <option selected>Otvori meni</option>
+                        <% for (let i = 0; i < podaci.length; i++) { %>
+                            <option value="<%= podaci[i].id %>">ID: <%= podaci[i].id %>,
+                                username: <%= podaci[i].username %> </option>
+                        <% } %>
+                    </select>
+
+                    <label for="selectRola" class="form-label">Tip radnika:</label>
+                    <select id="selectRola" class="form-select" name="selectRola">
+                        <option selected>Otvori meni</option>
+                        <option value="Radnik">Radnik</option>
+                        <option value="Menadzer">Menadzer</option>
+                    </select>
+
+
+                    <button type="submit" class="btn btn-success mt-3">Dodjeli projekat</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalDodajKorisnika" tabindex="-1" aria-labelledby="modalDodajKorisnikaLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDodajKorisnikaLabel">Dodaj korisnika</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formaDodajKorisnika" method="post">
+                    <div class="mb-3">
+                        <label for="ime" class="form-label">Ime korisnika:</label>
+                        <input type="text" class="form-control" id="ime" name="ime" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="prezime" class="form-label">Prezime korisnika:</label>
+                        <input type="text" class="form-control" id="prezime" name="prezime" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Korisničko ime:</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Šifra korisnika:</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tipKorisnika" class="form-label">Tip korisnika:</label>
+                        <input type="text" class="form-control" id="tipKorisnika" name="tipKorisnika" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="idNadredjeni" class="form-label">ID nadredjenog:</label>
+                        <input type="text" class="form-control" id="idNadredjeni" name="idNadredjeni">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submitDugme">Dodaj korisnika</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalAzurirajKorisnika" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAzurirajKorisnika">Ažuriraj korisnika</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formaAzurirajKorisnika" method="PUT" class="mx-auto mt-4" style="max-width: 400px;">
+                    <div class="mb-3" id="selektujID">
+                        <label for="selectKorisnika" class="form-label">ID korisnika:</label>
+                        <select id="selectKorisnika" class="form-select" name="selectKorisnika">
+                            <option selected>Otvori meni</option>
+                            <% for (let i = 0; i < podaci.length; i++) { %>
+                                <option value="<%= podaci[i].id %>">ID: <%= podaci[i].id %>,
+                                    username: <%= podaci[i].username %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="imeKorisnika" class="form-label">Ime korisnika:</label>
+                        <input type="text" class="form-control" id="imeKorisnika" name="imeKorisnika" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="prezimeKorisnika" class="form-label">Prezime korisnika:</label>
+                        <input type="text" class="form-control" id="prezimeKorisnika" name="prezimeKorisnika" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="usernameKorisnika" class="form-label">Korisničko ime:</label>
+                        <input type="text" class="form-control" id="usernameKorisnika" name="usernameKorisnika"
+                               required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="passwordKorisnika" class="form-label">Lozinka:</label>
+                        <input type="password" class="form-control" id="passwordKorisnika" name="passwordKorisnika"
+                               required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="typeKorisnika" class="form-label">Tip korisnika:</label>
+                        <input type="text" class="form-control" id="typeKorisnika" name="typeKorisnika" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="idSupervisor" class="form-label">ID nadredjenog:</label>
+                        <input type="text" class="form-control" id="idSupervisor" name="idSupervisor">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Ažuriraj korisnika</button>
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalGenerisiIzvjestaj" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalGenerisiIzvjestaj">Izvještaj o prisustvu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formaGenerisiIzvjestaj" method="GET" class="mx-auto mt-4" style="max-width: 400px;">
+                    <div class="mb-3" id="selektujID">
+                        <label for="selectKorisnikaIzvj" class="form-label">ID korisnika:</label>
+                        <select id="selectKorisnikaIzvj" class="form-select" name="selectKorisnikaIzvj">
+                            <option selected>Otvori meni</option>
+                            <% for (let i = 0; i < podaci.length; i++) { %>
+                                <option value="<%= podaci[i].id %>">ID: <%= podaci[i].id %>,
+                                    username: <%= podaci[i].username %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="datumOd" class="form-label">Početni datum</label>
+                        <input type="date" class="form-control" id="datumOd" name="datumOd" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="datumDo" class="form-label">Krajnji datum:</label>
+                        <input type="date" class="form-control" id="datumDo" name="datumDo" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="rezultatIzvjestaja" class="form-label">Rezultat:</label>
+                        <textarea class="form-control" id="rezultatIzvjestaja" rows="4"
+                                  placeholder="Rezultat izvještaja"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <p>Ukupan broj sati: </p>
+                        <p id="ukupanBroj"></p>
+
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Generiši izvještaj</button>
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="container mt-5" id="tabela">
+    <table class="table table-striped">
+        <thead class="bg-dark text-white">
+        <tr class="text-center">
+            <th>ID</th>
+            <th>Pitanje</th>
+            <th>Odgovor</th>
+            <th>ID Primalac</th>
+            <th>ID Posiljaoc</th>
+
+        </tr>
+        </thead>
+        <tbody id="tabelaPoruka">
+        <% for (let i = 0; i < podaciQA.length; i++) { %>
+            <tr id="red<%= podaciQA[i].id %>" class="text-center">
+                <td><%= podaciQA[i].id %></td>
+                <td id="pitanje<%= podaciQA[i].id %>"><%= podaciQA[i].pitanje %></td>
+                <td id="odgovor<%= podaciQA[i].id %>"><%= podaciQA[i].odgovor %></td>
+                <td id="idposiljaoc<%= podaciQA[i].id %>"><%= podaciQA[i].id_posiljaoc %></td>
+                <td id="id_primaoc<%= podaciQA[i].id %>"><%= podaciQA[i].id_primalac %></td>
+
+            </tr>
+        <% } %>
+
+        </tbody>
+    </table>
+</div>
+
+
+<div class="modal fade" id="modalQA" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalQA">Odgovori</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formaQA" method="POST" action="/adminPanel/odgovor" class="mx-auto mt-4"
+                      style="max-width: 400px;">
+
+                    <div class="mb-3" id="selektujIDPrimaoca">
+                        <label for="selectPrimaoc" class="form-label">ID korisnika:</label>
+                        <select id="selectPrimaoc" class="form-select" name="selectPrimaoc">
+                            <option selected>Otvori meni</option>
+                            <% for (let i = 0; i < podaci.length; i++) { %>
+                                <option value="<%= podaci[i].id %>">ID: <%= podaci[i].id %>,
+                                    username: <%= podaci[i].username %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+
+                    <div class="mb-3" id="selektujIDPitanja">
+                        <label for="selectPitanje" class="form-label">ID pitanja:</label>
+                        <select id="selectPitanje" class="form-select" name="selectPitanje">
+                            <option selected>Otvori meni</option>
+                            <% for (let i = 0; i < podaciQA.length; i++) { %>
+                                <option value="<%= podaciQA[i].id %>">ID: <%= podaciQA[i].id %>,
+                                    pitanje: <%= podaciQA[i].pitanje %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="odgovor" class="form-label">Odgovor:</label>
+                        <input type="text" class="form-control" id="odgovor" name="odgovor" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Pošalji odgovor</button>
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <button type="button" class="btn btn-dark mb-2" data-bs-toggle="modal" data-bs-target="#modalDodajProjekat">
+        Dodaj projekt
+    </button>
+
+    <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#modalDodjeliProjekat">
+        Dodjeli projekat
+    </button>
+
+    <button type="button" class="btn btn-dark mb-2" data-bs-toggle="modal" data-bs-target="#modalQA">
+        Odgovori na pitanje
+    </button>
+
+    <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#modalDodajKorisnika">
+        Dodaj korisnika
+    </button>
+
+    <button type="button" class="btn btn-dark mb-2" data-bs-toggle="modal" data-bs-target="#modalAzurirajKorisnika">
+        Ažuriraj korisnika
+    </button>
+
+    <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#modalGenerisiIzvjestaj">
+        Izvještaj o prisustvu
+    </button>
+
+    <button type="button" class="btn btn-dark mb-2" onclick="ucitajRadneSate()">Radni sati</button>
+
+    <button type="button" class="btn btn-secondary mb-2" onclick="ucitajTaskove()">Taskovi</button>
+
+    <button type="button" class="btn btn-dark mb-2" onclick="ucitajProjekte()">Projekti</button>
+
+    <button type="button" class="btn btn-danger mb-2" onclick="izlogujSe()">Logout</button>
+</div>
+
+
+<br><br><br>
+
+<script>
+    var zadnjiID;
+
+
+    function ucitajProjekte() {
+        window.location = "/adminPanel/ucitaniProjekti";
+    }
+
+    function ucitajTaskove() {
+        window.location = "/adminPanel/ucitaniTaskovi";
+    }
+
+    function ucitajRadneSate() {
+        window.location = "/adminPanel/ucitaniSati";
+    }
+
+    function izlogujSe() {
+        window.location = "/adminPanel/logout";
+    }
+
+
+    function updateZadnjiID() {
+        $.ajax({
+            url: "/adminPanel/getLastID",
+            method: "get",
+            success: (data) => {
+                zadnjiID = data.lastID;
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        })
+
+    }
+
+    $(document).ready(function () {
+        updateZadnjiID();
+    });
+
+
+    $('#formaProjekta').on('submit', function (event) {
+        event.preventDefault();
+
+        $.ajax({
+            url: "/adminPanel/dodajProjekt",
+            method: "POST",
+            data: $(this).serialize(),
+            success: function (data) {
+                let projektOpcija = `<option value="${data.id}">ID: ${data.id}, Naziv projekta: ${data.naziv}</option>`;
+                let selekt = document.getElementById("selectProjekt");
+                selekt.innerHTML += projektOpcija;
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    });
+
+
+    $('#formaDodajKorisnika').on('submit', function (event) {
+        event.preventDefault();
+
+        $.ajax({
+            url: "/adminPanel/dodaj",
+            method: "POST",
+            data: $(this).serialize(),
+            success: (data) => {
+                let lokalniZadnjiID = data[0].id;
+                let noviRed = `
+        <tr id="red${lokalniZadnjiID}">
+          <td>${lokalniZadnjiID}</td>
+          <td id="ime${lokalniZadnjiID}">${data[0].ime}</td>
+          <td id="prezime${lokalniZadnjiID}">${data[0].prezime}</td>
+          <td id="username${lokalniZadnjiID}">${data[0].username}</td>
+          <td id="password${lokalniZadnjiID}">${data[0].password}</td>
+          <td id="tip${lokalniZadnjiID}">${data[0].tip_korisnika}</td>
+          <td id="nadredjeni${lokalniZadnjiID}">${data[0].id_nadredjeni}</td>
+          <td><button type="button" class="btn btn-danger" onclick="obrisi(${lokalniZadnjiID})">Brisi</button></td>
+        </tr>`;
+
+                $('#tabelaKorisnika').append(noviRed);
+                let novaOpcija = `<option value="${lokalniZadnjiID}">ID: ${lokalniZadnjiID}, username: ${data[0].username}</option>`;
+                let selekt = document.getElementById("selectKorisnika");
+                selekt.innerHTML += novaOpcija;
+                updateZadnjiID();
+
+
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    });
+
+
+    $('#formaAzurirajKorisnika').on('submit', function (event) {
+        event.preventDefault();
+
+        var selectedValue = $('#selectKorisnika').val();
+
+        $.ajax({
+            url: "/adminPanel/modifikujuser",
+            method: "PUT",
+            data: $(this).serialize() + "&selectKorisnika=" + selectedValue,
+            success: function (data) {
+                let $red = $('#red' + data.azuriraniPodaci[0].id);
+                $red.find('#ime' + data.azuriraniPodaci[0].id).text(data.azuriraniPodaci[0].ime);
+                $red.find('#prezime' + data.azuriraniPodaci[0].id).text(data.azuriraniPodaci[0].prezime);
+                $red.find('#username' + data.azuriraniPodaci[0].id).text(data.azuriraniPodaci[0].username);
+                $red.find('#password' + data.azuriraniPodaci[0].id).text(data.azuriraniPodaci[0].password);
+                $red.find('#tip' + data.azuriraniPodaci[0].id).text(data.azuriraniPodaci[0].tip_korisnika);
+                $red.find('#nadredjeni' + data.azuriraniPodaci[0].id).text(data.azuriraniPodaci[0].id_nadredjeni);
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    });
+
+
+    const obrisi = (id) => {
+        $.ajax({
+            url: `/adminPanel/${id}`,
+            method: "DELETE",
+            success: () => {
+                document.getElementById(`red${id}`).remove();
+                updateZadnjiID();
+            },
+            error: function (err) {
+                console.log(err);
+            }
+
+
+        })
+    };
+
+    $('#formaGenerisiIzvjestaj').on('submit', function (event) {
+        event.preventDefault();
+        var id = $('#selectKorisnikaIzvj').val();
+        $.ajax({
+            url: "/adminPanel/izvjPrisustvo",
+            method: "GET",
+            data: $(this).serialize(),
+            success: (data) => {
+                let rez = '';
+                for (let i = 0; i < data.izvjestaj.length; i++) {
+                    let date = new Date(data.izvjestaj[i].datum);
+
+                    let formatiranDatum = date.toLocaleDateString();
+
+                    rez += formatiranDatum + ", " + data.izvjestaj[i].broj_radnih_sati + " ";
+                }
+
+                document.getElementById("rezultatIzvjestaja").innerText = rez;
+                document.getElementById("ukupanBroj").innerText = data.ukupan_broj;
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    });
+
+
+    $('#formaQA').on('submit', function (event) {
+        event.preventDefault();
+
+        $.ajax({
+            url: "/adminPanel/odgovor",
+            method: "POST",
+            data: $(this).serialize(),
+            success: function (data) {
+                if (data.success) {
+                    let idPitanja = $("#selectPitanje").val();
+                    let answer = $("#odgovor").val();
+
+
+                    let $red = $('#red' + idPitanja);
+                    $red.find('#odgovor' + idPitanja).text(answer);
+
+
+                } else {
+                    console.error("Operacija nije uspela.");
+                }
+            },
+            error: function (err) {
+                console.log("Greška prilikom komunikacije sa serverom:", err);
+
+            }
+        });
+    });
+
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

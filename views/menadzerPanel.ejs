@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
+
+    <title>Menadžer panel</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+
+<body>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <p>Podaci o menadžeru</p>
+            </div>
+            <div class="mb-3">
+                <p><strong>Ime:</strong> <%= podaciMenadzera[0].ime %></p>
+            </div>
+            <div class="mb-3">
+                <p><strong>Prezime:</strong> <%= podaciMenadzera[0].prezime %></p>
+            </div>
+            <div class="mb-3">
+                <p><strong>Username:</strong> <%= podaciMenadzera[0].username %></p>
+            </div>
+            <div class="mb-3">
+                <p><strong>Password:</strong> <%= podaciMenadzera[0].password %></p>
+            </div>
+            <div class="mb-3">
+                <p><strong>ID nadređenog:</strong> <%= podaciMenadzera[0].id_nadredjeni %></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<h1 class="text-center">Projekti</h1>
+<div class="container mt-5" id="tabela">
+    <table class="table table-striped">
+        <thead class="bg-dark text-white">
+        <tr>
+            <th>ID</th>
+            <th>Naziv</th>
+            <th>Datum potpisivanja</th>
+            <th>Krajnji rok</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody id="tabelaProjekata">
+        <% for (let i = 0; i < projektiMenadzera.length; i++) { %>
+            <tr id="red<%= projektiMenadzera[i].id_projekta %>">
+                <td><%= projektiMenadzera[i].id_projekta %></td>
+                <td id="naziv<%= projektiMenadzera[i].id_projekta %>"><%= projektiMenadzera[i].naziv_projekta %></td>
+                <td id="datum<%= projektiMenadzera[i].id_projekta %>"><%= projektiMenadzera[i].startni_datum.toLocaleDateString('hr-HR') %></td>
+                <td id="rok<%= projektiMenadzera[i].id_projekta %>"><%= projektiMenadzera[i].zavrsni_datum.toLocaleDateString('hr-HR') %></td>
+                <td id="status<%= projektiMenadzera[i].id_projekta %>"><%= projektiMenadzera[i].status_projekta %></td>
+                <td>
+                    <button class="btn btn-success" type="button"
+                            onclick="ukupniSatiProjekt(<%= projektiMenadzera[i].id_projekta %>)">Broj radnih sati
+                    </button>
+                </td>
+
+
+            </tr>
+        <% } %>
+
+        </tbody>
+    </table>
+</div>
+<h1 class="text-center mt-5">Taskovi</h1>
+<div class="container mt-5" id="tabela">
+    <table class="table table-striped">
+        <thead class="bg-dark text-white">
+        <tr>
+            <th>ID taska</th>
+            <th>Naziv</th>
+            <th>Opis</th>
+            <th>ID projekta</th>
+        </tr>
+        </thead>
+        <tbody id="tabelaTaskova">
+        <% for (let i = 0; i < taskoviMenadzera.length; i++) { %>
+            <tr id="red<%= taskoviMenadzera[i].id_taska %>">
+                <td><%= taskoviMenadzera[i].id_taska %></td>
+                <td id="naziv<%= taskoviMenadzera[i].id_taska %>"><%= taskoviMenadzera[i].naziv %></td>
+                <td id="opis<%= taskoviMenadzera[i].id_taska %>"><%= taskoviMenadzera[i].opis %></td>
+                <td id="idprojekta<%= taskoviMenadzera[i].id_taska %>"><%= taskoviMenadzera[i].id_projekta %></td>
+
+
+            </tr>
+        <% } %>
+
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="modalDodjeliProjekat" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDodjeliProjekatLabel">Dodjeli projekat</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formaDodjeliProjekat" action="/menadzerPanel/dodijeliProjekt" method="post"
+                      class="mx-auto mt-4" style="max-width: 400px;">
+
+                    <label for="selectProjekt" class="form-label">ID projekta:</label>
+                    <select id="selectProjekt" class="form-select" name="selectProjekt">
+                        <option selected>Otvori meni</option>
+                        <% for (let i = 0; i < projektiMenadzera.length; i++) { %>
+                            <option value="<%= projektiMenadzera[i].id_projekta %>">
+                                ID: <%= projektiMenadzera[i].id_projekta %>, Naziv
+                                projekta: <%= projektiMenadzera[i].naziv_projekta %> </option>
+                        <% } %>
+                    </select>
+
+                    <label for="selectRadnika" class="form-label">ID radnika:</label>
+                    <select id="selectRadnika" class="form-select" name="selectRadnika">
+                        <option selected>Otvori meni</option>
+                        <% for (let i = 0; i < podaciKorisnici.length; i++) { %>
+                            <option value="<%= podaciKorisnici[i].id %>">ID: <%= podaciKorisnici[i].id %>,
+                                username: <%= podaciKorisnici[i].username %> </option>
+                        <% } %>
+                    </select>
+
+                    <label for="selectRola" class="form-label">Tip radnika:</label>
+                    <select id="selectRola" class="form-select" name="selectRola">
+                        <option selected>Otvori meni</option>
+                        <option value="Radnik">Radnik</option>
+                        <option value="Menadzer">Menadzer</option>
+                    </select>
+
+                    <button type="submit" class="btn btn-success mt-3">Dodjeli projekat</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h1 class="text-center mt-5">OUTBOX</h1>
+<div class="container mt-5" id="tabela">
+    <table class="table table-striped">
+        <thead class="bg-dark text-white">
+        <tr class="text-center">
+            <th>ID</th>
+            <th>Pitanje</th>
+            <th>Odgovor</th>
+            <th>ID Posiljaoc</th>
+            <th>ID Primalac</th>
+
+
+        </tr>
+        </thead>
+        <tbody id="tabelaPoruka">
+        <% for (let i = 0; i < podaciQA.length; i++) { %>
+            <tr id="red<%= podaciQA[i].id %>" class="text-center">
+                <td><%= podaciQA[i].id %></td>
+                <td id="pitanje<%= podaciQA[i].id %>"><%= podaciQA[i].pitanje %></td>
+                <td id="odgovor<%= podaciQA[i].id %>"><%= podaciQA[i].odgovor %></td>
+                <td id="idposiljaoc<%= podaciQA[i].id %>"><%= podaciQA[i].id_posiljaoc %></td>
+                <td id="id_primaoc<%= podaciQA[i].id %>"><%= podaciQA[i].id_primalac %></td>
+
+            </tr>
+        <% } %>
+
+        </tbody>
+    </table>
+</div>
+
+
+<div class="modal fade" id="modalQA" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalQA">Pitanja</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formaPitanje" method="POST" action="/menadzerPanel/pitanje" class="mx-auto mt-4"
+                      style="max-width: 400px;">
+
+
+                    <div class="mb-3" id="selektujIDPrimaoca">
+                        <label for="selectPrimaoc" class="form-label">ID korisnika:</label>
+                        <select id="selectPrimaoc" class="form-select" name="selectPrimaoc">
+                            <option selected>Otvori meni</option>
+                            <% for (let i = 0; i < podaciKorisnici.length; i++) { %>
+                                <option value="<%= podaciKorisnici[i].id %>">ID: <%= podaciKorisnici[i].id %>,
+                                    username: <%= podaciKorisnici[i].username %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="pitanje" class="form-label">Pitanje:</label>
+                        <input type="text" class="form-control" id="pitanje" name="pitanje" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Pošalji pitanje</button>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<h1 class="text-center mt-5">INBOX</h1>
+
+<div class="container mt-5" id="tabela">
+    <table class="table table-striped">
+        <thead class="bg-dark text-white">
+        <tr class="text-center">
+            <th>ID</th>
+            <th>Pitanje</th>
+            <th>Odgovor</th>
+            <th>ID Primalac</th>
+            <th>ID Posiljaoc</th>
+
+        </tr>
+        </thead>
+        <tbody id="tabelaInbox">
+        <% for (let i = 0; i < podaciPrimaoc.length; i++) { %>
+            <tr id="Red<%= podaciPrimaoc[i].id %>" class="text-center">
+                <td><%= podaciPrimaoc[i].id %></td>
+                <td id="Pitanje<%= podaciPrimaoc[i].id %>"><%= podaciPrimaoc[i].pitanje %></td>
+                <td id="Odgovor<%= podaciPrimaoc[i].id %>"><%= podaciPrimaoc[i].odgovor %></td>
+                <td id="Id_primaoc<%= podaciPrimaoc[i].id %>"><%= podaciPrimaoc[i].id_primalac %></td>
+                <td id="Idposiljaoc<%= podaciPrimaoc[i].id %>"><%= podaciPrimaoc[i].id_posiljaoc %></td>
+
+            </tr>
+        <% } %>
+
+        </tbody>
+    </table>
+</div>
+
+
+<div class="modal fade" id="modalOdgovori" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalOdgovori">Odgovori</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formaOdgovor" method="POST" action="/menadzerPanel/odgovor" class="mx-auto mt-4"
+                      style="max-width: 400px;">
+
+
+                    <div class="mb-3" id="selektujIDPrimaoca">
+                        <label for="selectPrimaoc" class="form-label">ID korisnika:</label>
+                        <select id="selectPrimaoc" class="form-select" name="selectPrimaoc">
+                            <option selected>Otvori meni</option>
+                            <% for (let i = 0; i < podaciKorisnici.length; i++) { %>
+                                <option value="<%= podaciKorisnici[i].id %>">ID: <%= podaciKorisnici[i].id %>,
+                                    username: <%= podaciKorisnici[i].username %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+
+                    <div class="mb-3" id="selektujIDPitanja">
+                        <label for="selectPitanje" class="form-label">ID pitanja:</label>
+                        <select id="selectPitanje" class="form-select" name="selectPitanje">
+                            <option selected>Otvori meni</option>
+                            <% for (let i = 0; i < podaciPrimaoc.length; i++) { %>
+                                <option value="<%= podaciPrimaoc[i].id %>">ID: <%= podaciPrimaoc[i].id %>,
+                                    pitanje: <%= podaciPrimaoc[i].pitanje %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="odgovor" class="form-label">Odgovor:</label>
+                        <input type="text" class="form-control" id="odgovor" name="odgovor" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Pošalji odgovor</button>
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <button type="button" class="btn btn-dark mb-2" data-bs-toggle="modal" data-bs-target="#modalOdgovori">
+        Odgovori na pitanje
+    </button>
+
+    <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#modalQA">
+        Pošalji pitanje
+    </button>
+
+    <button type="button" class="btn btn-dark mb-2" onclick="izvjestajTaskova()">Izvještaj za taskove</button>
+
+    <button type="button" class="btn btn-secondary mb-2" data-bs-toggle="modal" data-bs-target="#modalDodjeliProjekat">
+        Dodjeli projekat
+    </button>
+
+    <button type="button" class="btn btn-danger mb-2" onclick="izlogujSe()">Logout</button>
+</div>
+
+
+<script>
+    function ukupniSatiProjekt(id) {
+        window.location = `/menadzerPanel/ukupniSati/${id}`;
+    }
+
+    function izvjestajTaskova() {
+        window.location = "/menadzerPanel/izvjestajZaTaskove";
+    }
+
+    function izlogujSe() {
+        window.location = "/menadzerPanel/logout";
+    }
+
+    $('#formaPitanje').on('submit', function (event) {
+        event.preventDefault();
+
+        $.ajax({
+            url: "/menadzerPanel/pitanje",
+            method: "POST",
+            data: $(this).serialize(),
+            success: function (data) {
+                if (data.success) {
+                    let zadnjiID = data.noviId;
+                    let koSalje = data.idPosiljaoca;
+                    let question = $("#pitanje").val();
+                    let koPrima = $("#selectPrimaoc").val();
+                    let noviRed = '<tr id="red' + zadnjiID + '" class="text-center">' +
+                        '<td>' + zadnjiID + '</td>' +
+                        '<td id="pitanje' + zadnjiID + '">' + question + '</td>' +
+                        '<td id="odgovor' + zadnjiID + '"></td>' +
+                        '<td id="idposiljaoc' + zadnjiID + '">' + koSalje + '</td>' +
+                        '<td id="id_primaoc' + zadnjiID + '">' + koPrima + '</td>' +
+                        '</tr>';
+
+                    $('#tabelaPoruka').append(noviRed);
+                } else {
+                    console.error("Operacija nije uspela.");
+                }
+            },
+            error: function (err) {
+                console.log("Greška prilikom komunikacije sa serverom:", err);
+            }
+        });
+    });
+
+    $('#formaOdgovor').on('submit', function (event) {
+        event.preventDefault();
+
+        $.ajax({
+            url: "/menadzerPanel/odgovor",
+            method: "POST",
+            data: $(this).serialize(),
+            success: function (data) {
+                if (data.success) {
+                    let idPitanja = $("#selectPitanje").val();
+                    let answer = $("#odgovor").val();
+                    let $red = $('#Red' + idPitanja);
+                    $red.find('#Odgovor' + idPitanja).text(answer);
+
+
+                } else {
+                    console.error("Operacija nije uspela.");
+                }
+            },
+            error: function (err) {
+                console.log("Greška prilikom komunikacije sa serverom:", err);
+            }
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

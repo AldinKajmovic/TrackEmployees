@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+</head>
+<body>
+<h1><%= poruka %></h1>
+<button type="button" class="btn btn-primary" onclick="otvoriRadnik()">Radnik</button>
+<button type="button" class="btn btn-primary" onclick="otvoriMenadzer()">Menadžer</button>
+<button type="button" class="btn btn-primary" onclick="otvoriAdmin()">Admin</button>
+
+
+<script>
+    function otvoriRadnik() {
+        window.location = "/radnik";
+    }
+
+    function otvoriMenadzer() {
+        window.location = "/menadzerPanel";
+    }
+
+    function otvoriAdmin() {
+        window.location = "/adminPanel";
+    }
+
+
+</script>
+</body>
+</html>

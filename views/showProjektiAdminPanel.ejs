@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  </head>
+  <body>
+  <div class="container mt-5" id="tabela">
+    <table class="table table-striped">
+      <thead class="bg-dark text-white">
+      <tr>
+        <th>ID</th>
+        <th>Naziv</th>
+        <th>Datum potpisivanja</th>
+        <th>Krajnji rok</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody id="tabelaProjekata">
+      <% for (let i = 0; i < projektData.length; i++) { %>
+        <tr id="red<%= projektData[i].id_projekta %>">
+          <td><%= projektData[i].id_projekta %></td>
+          <td id="naziv<%= projektData[i].id_projekta %>"><%= projektData[i].naziv_projekta %></td>
+          <td id="datum<%= projektData[i].id_projekta %>"><%= projektData[i].startni_datum.toLocaleDateString('hr-HR') %></td>
+          <td id="rok<%= projektData[i].id_projekta %>"><%= projektData[i].zavrsni_datum.toLocaleDateString('hr-HR') %></td>
+          <td id="status<%= projektData[i].id_projekta %>"><%= projektData[i].status_projekta %></td>
+
+        </tr>
+      <% } %>
+      </tbody>
+    </table>
+  </div>
+
+
+  <div class="container mt-5">
+    <h2>Izmjena stanja projekta</h2>
+    <form method="post" action="/adminPanel/azurirajStanjeProjekta" id="formAzurirajStanje">
+
+      <label for="selectProjekt" class="form-label">ID projekta:</label>
+      <select id="selectProjekt" class="form-select" name="selectProjekt">
+        <option selected>Otvori meni</option>
+        <% for (let i = 0; i < projektData.length; i++) { %>
+          <option value="<%= projektData[i].id_projekta %>">ID: <%= projektData[i].id_projekta %>, Naziv projekta: <%= projektData[i].naziv_projekta%> </option>
+        <%}%>
+
+      </select>
+      <div class="mb-3">
+        <label for="statusProjekta" class="form-label">Status:</label>
+        <select class="form-select" id="statusProjekta" required name="statusProjekta">
+          <option value="" disabled selected>Odaberite status</option>
+          <option value="U toku">U toku</option>
+          <option value="Završen">Završen</option>
+          <option value="Kasni">Kasni</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Ažuriraj stanje</button>
+    </form>
+  </div>
+
+
+  <script>
+    $('#formAzurirajStanje').on('submit', function (event) {
+      event.preventDefault();
+
+      $.ajax({
+        url: "/adminPanel/azurirajStanjeProjekta",
+        method: "POST",
+        data: $(this).serialize(),
+        success: function (data) {
+          if (data.success) {
+            var selectedProjectId = $('#selectProjekt').val();
+            var updatedStatus = $('#statusProjekta').val();
+
+            var rowId = "#red" + selectedProjectId;
+            $(rowId + ' #status' + selectedProjectId).text(updatedStatus);
+          } else {
+            console.log("Server response indicates failure");
+            alert("Failed to update project status. Error: " + data.error);
+          }
+        },
+        error: function (err) {
+          console.log("Ajax request error:", err);
+          alert("An unexpected error occurred. Please try again later.");
+        }
+      });
+    });
+  </script>
+
+
+  </body>
+</html>

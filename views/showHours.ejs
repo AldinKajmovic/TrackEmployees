@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+
+</head>
+<body>
+<h1>Izvještaj o radnim satima na taskovima </h1>
+<div class="container mt-5" id="tabela">
+    <table class="table table-striped">
+        <thead class="bg-dark text-white">
+        <tr>
+            <th>ID radnika</th>
+            <th>Naziv projekta</th>
+            <th>Datum</th>
+            <th>Broj radnih sati</th>
+            <th>Naziv taska</th>
+        </tr>
+        </thead>
+        <tbody id="tabelaSati">
+        <% for (let i = 0; i < sati.length; i++) { %>
+            <tr id="red<%= sati[i].id %>">
+                <td id="idradnika<%= sati[i].id %>"><%= sati[i].id_radnika %></td>
+                <td id="nazivprojekta<%= sati[i].id %>"><%= sati[i].naziv_projekta %></td>
+                <td id="datum<%= sati[i].id %>"><%= sati[i].datum.toLocaleDateString('hr-HR') %></td>
+                <td id="brojsati<%= sati[i].id %>"><%= sati[i].broj_sati %></td>
+                <td id="nazivzadatka<%= sati[i].id %>"><%= sati[i].naziv %></td>
+            </tr>
+        <% } %>
+
+        </tbody>
+    </table>
+</div>
+
+
+</body>
+</html>

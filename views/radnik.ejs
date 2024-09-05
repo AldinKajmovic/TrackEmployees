@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Radnik</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+
+<div class="container mb-3 mt-3">
+    <button type="button" class="btn btn-danger" onclick="izlogujSe()">Logout</button>
+</div>
+<div class="modal fade" id="exampleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Unos podataka</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="/radnik/dodajRadneSate">
+                    <div class="mb-3">
+                        <label for="selectKlijent" class="form-label">Klijent:</label>
+                        <select id="selectKlijent" class="form-select" name="selectKlijent" required>
+                            <option selected>Otvori meni</option>
+                            <% for (let i = 0; i < podaciKlijenta.length; i++) { %>
+                                <option value="<%= podaciKlijenta[i].id_klijenta %>">
+                                    ID: <%= podaciKlijenta[i].id_klijenta %> <%= podaciKlijenta[i].ime %> <%= podaciKlijenta[i].prezime %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="selectIDprojekt" class="form-label">Projekt:</label>
+                        <select id="selectIDprojekt" class="form-select" name="selectIDprojekt" required>
+                            <option selected>Izaberi projekt</option>
+
+                        </select>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label for="selectTask" class="form-label">ID i naziv taska:</label>
+                        <select id="selectTask" class="form-select" name="selectTask" required>
+                            <option selected>Otvori meni</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="hours" class="form-label">Broj sati:</label>
+                        <input type="number" class="form-control" id="hours" placeholder="Unesite broj sati" required
+                               name="hours">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Potvrdi</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="container mt-5">
+    <h2>Izmjena stanja projekta</h2>
+    <form method="post" action="/radnik/azurirajStanjeProjekta">
+
+        <label for="selectProjekt" class="form-label">ID projekta:</label>
+        <select id="selectProjekt" class="form-select" name="selectProjekt">
+            <option selected>Otvori meni</option>
+            <% for (let i = 0; i < podaciProjekata.length; i++) { %>
+                <option value="<%= podaciProjekata[i].id_projekta %>">ID: <%= podaciProjekata[i].id_projekta %>, Naziv
+                    projekta: <%= podaciProjekata[i].naziv_projekta %> </option>
+            <% } %>
+
+        </select>
+        <div class="mb-3">
+            <label for="statusProjekta" class="form-label">Status:</label>
+            <select class="form-select" id="statusProjekta" required name="statusProjekta">
+                <option value="" disabled selected>Odaberite status</option>
+                <option value="U toku">U toku</option>
+                <option value="Završen">Završen</option>
+                <option value="Kasni">Kasni</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-dark">Ažuriraj stanje</button>
+    </form>
+</div>
+
+<div class="container mt-5">
+    <h2>Izmjena stanja taska</h2>
+    <form method="post" action="/radnik/promjeniStanjeTaska">
+
+        <label for="selectTaskUpdate" class="form-label">ID taska:</label>
+        <select id="selectTaskUpdate" class="form-select" name="selectTaskUpdate">
+            <option selected>Otvori meni</option>
+            <% for (let i = 0; i < podaciTaskova.length; i++) { %>
+                <option value="<%= podaciTaskova[i].id_taska %>">ID: <%= podaciTaskova[i].id_taska %>, Naziv
+                    taska: <%= podaciTaskova[i].naziv %> </option>
+            <% } %>
+
+        </select>
+        <div class="mb-3">
+            <label for="statusTaska" class="form-label">Status:</label>
+            <select class="form-select" id="statusTaska" required name="statusTaska">
+                <option value="" disabled selected>Odaberite status</option>
+                <option value="U toku">U toku</option>
+                <option value="Završen">Završen</option>
+                <option value="Kasni">Kasni</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-secondary">Ažuriraj stanje</button>
+    </form>
+</div>
+
+
+<div class="container">
+    <button type="button" class="btn btn-dark mt-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Unesi radne sate
+    </button>
+
+</div>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <p>Podaci o radniku</p>
+            </div>
+            <div class="mb-3">
+                <p><strong>Ime:</strong> <%= podaciRadnika[0].ime %></p>
+            </div>
+            <div class="mb-3">
+                <p><strong>Prezime:</strong> <%= podaciRadnika[0].prezime %></p>
+            </div>
+            <div class="mb-3">
+                <p><strong>Username:</strong> <%= podaciRadnika[0].username %></p>
+            </div>
+            <div class="mb-3">
+                <p><strong>Password:</strong> <%= podaciRadnika[0].password %></p>
+            </div>
+            <div class="mb-3">
+                <p><strong>ID nadređenog:</strong> <%= podaciRadnika[0].id_nadredjeni %></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalDodajTask" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDodajTaskLabel">Dodaj task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formaDodajTask" method="post" action="/radnik/dodajTask">
+
+                    <div class="mb-3" id="selektujID">
+                        <label for="selectProjekatTask" class="form-label">ID i naziv projekta:</label>
+                        <select id="selectProjekatTask" class="form-select" name="selectProjekatTask" required>
+                            <option selected>Otvori meni</option>
+                            <% for (let i = 0; i < podaciProjekata.length; i++) { %>
+                                <option value="<%= podaciProjekata[i].id_projekta %>">
+                                    ID: <%= podaciProjekata[i].id_projekta %>,
+                                    username: <%= podaciProjekata[i].naziv_projekta %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label for="nazivTaska" class="form-label">Naziv:</label>
+                        <input type="text" class="form-control" id="nazivTaska" name="nazivTaska" required>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label for="opisTaska" class="form-label">Opis:</label>
+                        <input type="text" class="form-control" id="opisTaska" name="opisTaska" required>
+                    </div>
+
+
+                    <button type="submit" class="btn btn-primary" id="submitDugme">Dodaj task</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="mb-3">
+        <label for="unos" class="form-label">Brzi unos (#projekat ##task t5):</label>
+        <input type="text" id="unos" class="form-control" required>
+    </div>
+    <button type="button" class="btn btn-secondary" onclick="unesiVrijeme()">Unesi broj radnih sati</button>
+</div>
+<h1 class="text-center mt-5">PROJEKTI</h1>
+<div class="container mt-5" id="tabela">
+    <table class="table table-striped">
+        <thead class="bg-dark text-white">
+        <tr>
+            <th>ID</th>
+            <th>Naziv</th>
+            <th>Datum potpisivanja</th>
+            <th>Krajnji rok</th>
+            <th>Status</th>
+            <th colspan=2></th>
+        </tr>
+        </thead>
+        <tbody id="tabelaProjekata">
+        <% for (let i = 0; i < podaciProjekata.length; i++) { %>
+            <tr id="red<%= podaciProjekata[i].id_projekta %>">
+                <td><%= podaciProjekata[i].id_projekta %></td>
+                <td id="naziv<%= podaciProjekata[i].id_projekta %>"><%= podaciProjekata[i].naziv_projekta %></td>
+                <td id="datum<%= podaciProjekata[i].id_projekta %>"><%= podaciProjekata[i].startni_datum.toLocaleDateString('hr-HR') %></td>
+                <td id="rok<%= podaciProjekata[i].id_projekta %>"><%= podaciProjekata[i].zavrsni_datum.toLocaleDateString('hr-HR') %></td>
+                <td id="status<%= podaciProjekata[i].id_projekta %>"><%= podaciProjekata[i].status_projekta %></td>
+                <td>
+                    <button type="button" class="btn btn-success"
+                            onclick="showTask(<%= podaciProjekata[i].id_projekta %>)">Prikaži taskove
+                    </button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-success"
+                            onclick="showHours(<%= podaciProjekata[i].id_projekta %>)">Prikaži radne sate
+                    </button>
+                </td>
+
+
+            </tr>
+        <% } %>
+
+        </tbody>
+    </table>
+</div>
+
+<h1 class="text-center mt-5">INBOX</h1>
+<div class="container mt-5" id="tabela">
+    <table class="table table-striped">
+        <thead class="bg-dark text-white">
+        <tr class="text-center">
+            <th>ID</th>
+            <th>Pitanje</th>
+            <th>Odgovor</th>
+            <th>ID Pošiljaoc</th>
+            <th>ID Primalac</th>
+
+
+        </tr>
+        </thead>
+        <tbody id="tabelaPoruka">
+        <% for (let i = 0; i < podaciQA.length; i++) { %>
+            <tr id="red<%= podaciQA[i].id %>" class="text-center">
+                <td><%= podaciQA[i].id %></td>
+                <td id="pitanje<%= podaciQA[i].id %>"><%= podaciQA[i].pitanje %></td>
+                <td id="odgovor<%= podaciQA[i].id %>"><%= podaciQA[i].odgovor %></td>
+                <td id="idposiljaoc<%= podaciQA[i].id %>"><%= podaciQA[i].id_posiljaoc %></td>
+                <td id="id_primaoc<%= podaciQA[i].id %>"><%= podaciQA[i].id_primalac %></td>
+
+            </tr>
+        <% } %>
+
+        </tbody>
+    </table>
+</div>
+
+
+<div class="modal fade" id="modalQA" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalQA">Pitanja</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formaQA" method="POST" action="/radnik/pitanje" class="mx-auto mt-4"
+                      style="max-width: 400px;">
+
+
+                    <div class="mb-3" id="selektujIDPrimaoca">
+                        <label for="selectPrimaoc" class="form-label">ID korisnika:</label>
+                        <select id="selectPrimaoc" class="form-select" name="selectPrimaoc">
+                            <option selected>Otvori meni</option>
+                            <% for (let i = 0; i < podaciKorisnika.length; i++) { %>
+                                <option value="<%= podaciKorisnika[i].id %>">ID: <%= podaciKorisnika[i].id %>,
+                                    username: <%= podaciKorisnika[i].username %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="pitanje" class="form-label">Pitanje:</label>
+                        <input type="text" class="form-control" id="pitanje" name="pitanje" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Pošalji pitanje</button>
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="container mt-5 d-flex justify-content-center mb-5">
+    <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#modalDodajTask">
+        Dodaj task
+    </button>
+    <button type="button" class="btn btn-secondary ml-3" data-bs-toggle="modal" data-bs-target="#modalQA">
+        Pošalji pitanje
+    </button>
+</div>
+
+<script>
+    function izlogujSe() {
+        window.location = "/radnik/logout";
+    }
+
+    function showTask(id) {
+        window.location = `/radnik/prikaziTask/${id}`;
+
+    }
+
+    function showHours(id) {
+        window.location = `/radnik/prikaziSate/${id}`;
+
+    }
+
+    function unesiVrijeme() {
+        const unos = document.getElementById('unos').value;
+
+        const regEx = /#(\w+) ##(\w+) t(\d+)/;
+        const poklapaSe = unos.match(regEx);
+
+        if (poklapaSe) {
+            const projekat = poklapaSe[1];
+            const task = poklapaSe[2];
+            const sati = parseInt(poklapaSe[3], 10);
+
+            const queryParams = `?projekat=${projekat}&task=${task}&sati=${sati}`;
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '/radnik/brzoParsiranje' + queryParams, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    window.location.href = '/radnik/brzoParsiranje';
+                } else {
+                    console.error('Došlo je do greške prilikom slanja zahtjeva:', xhr.status);
+                }
+            };
+            xhr.send();
+        } else {
+            alert("Pogrešan format unosa.");
+        }
+    }
+
+    $(document).ready(function () {
+
+        $("#selectKlijent").on("change", function () {
+            var klijentId = $(this).val();
+            $.ajax({
+                method: "GET",
+                url: "/radnik/getProjekt",
+                data: {klijentId: klijentId},
+                success: function (data) {
+                    $("#selectIDprojekt").empty();
+                    $("#selectIDprojekt").append('<option selected>Otvori meni</option>');
+                    for (let i = 0; i < data.length; i++) {
+                        $("#selectIDprojekt").append('<option value="' + data[i].id_projekta + '">ID: ' + data[i].id_projekta + ' -> ' + data[i].naziv_projekta + '</option>');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Ajax nije uspio:", xhr, status, error);
+                }
+            });
+
+        });
+
+        $("#selectIDprojekt").on("change", function () {
+            var projectId = $(this).val();
+            $.ajax({
+                method: "GET",
+                url: "/radnik/getTasks",
+                data: {projectId: projectId},
+                success: function (data) {
+                    $("#selectTask").empty();
+                    $("#selectTask").append('<option selected>Otvori meni</option>');
+                    for (let i = 0; i < data.length; i++) {
+                        $("#selectTask").append('<option value="' + data[i].id_taska + '">ID: ' + data[i].id_taska + ' -> ' + data[i].naziv + ' -> ID projekta: ' + data[i].id_projekta + '</option>');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Ajax nije uspio:", xhr, status, error);
+                }
+            });
+
+        });
+
+    });
+
+    $('#formaQA').on('submit', function (event) {
+        event.preventDefault();
+
+        $.ajax({
+            url: "/radnik/pitanje",
+            method: "POST",
+            data: $(this).serialize(),
+            success: function (data) {
+                if (data.success) {
+                    let zadnjiID = data.noviId;
+                    let koSalje = data.idPosiljaoca;
+                    let question = $("#pitanje").val();
+                    let koPrima = $("#selectPrimaoc").val();
+
+                    let noviRed = '<tr id="red' + zadnjiID + '" class="text-center">' +
+                        '<td>' + zadnjiID + '</td>' +
+                        '<td id="pitanje' + zadnjiID + '">' + question + '</td>' +
+                        '<td id="odgovor' + zadnjiID + '"></td>' + // Postavite odgovor na prazan, po potrebi
+                        '<td id="idposiljaoc' + zadnjiID + '">' + koSalje + '</td>' +
+                        '<td id="id_primaoc' + zadnjiID + '">' + koPrima + '</td>' +
+                        '</tr>';
+
+                    $('#tabelaPoruka').append(noviRed);
+                } else {
+                    console.error("Operacija nije uspela.");
+                }
+            },
+            error: function (err) {
+                console.log("Greška prilikom komunikacije sa serverom:", err);
+            }
+        });
+    });
+
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js"></script>
+
+</body>
+</html>

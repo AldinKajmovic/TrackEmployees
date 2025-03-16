@@ -22,23 +22,12 @@
 
 ## Installation
 
- Clone the repository:
+Create and edit .env file using .env.example
+
+ Start application
    ```bash
-   git clone https://github.com/AldinKajmovic/TrackEmployees.git
-   cd TrackEmployees
+   docker compose up
    ```
-  Install dependencies:
-
-    npm install
-
-Set up PostgreSQL database:
-
-  Create a new database and update the database configuration in the .env file.
-
-
-Start the server:
-
-    npm start
 
   Open your browser and go to http://localhost:3000/login
 

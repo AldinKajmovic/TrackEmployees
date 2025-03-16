@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const saltRounds = 10;
 const pg = require('pg');
 require('dotenv').config();
@@ -16,19 +16,7 @@ const config = {
 let pool = new pg.Pool(config);
 
 const kriptujSifru = async (obicnaSifra) => {
-    return new Promise((resolve, reject) => {
-        bcrypt.genSalt(saltRounds, function (err, salt) {
-            if (err) reject(err);
-            bcrypt.hash(obicnaSifra, salt, function (err, hash) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(hash);
-                }
-            });
-        });
-
-    });
+    return bcrypt.hash(obicnaSifra, saltRounds);
 };
 
 
@@ -47,7 +35,7 @@ router.post('/', async function (req, res, next) {
             if (err) {
                 return res.send(err);
             }
-            if (result.rows.length === 0) { //Nije tačna šifra ili takav korisnik ne postoji, preusmjeri da se opet prijavi
+            if (result.rows.length === 0) { 
                 return res.render('prijava');
             }
             bcrypt.compare(req.body.password, result.rows[0].password, function (err, resCompare) {

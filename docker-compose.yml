@@ -1,0 +1,38 @@
+services: 
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: node:v1.0
+    ports:
+      - "3000:3000"
+    deploy:
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=${DB_URL}
+  postgres:
+      image: postgres:17.4-alpine
+      volumes:
+        - postgres-data:/var/lib/postgresql/data
+        - ./init.sql:/docker-entrypoint-initdb.d/init.sql 
+      environment:   
+        - POSTGRES_HOST=${DB_HOST}
+        - POSTGRES_USER=${DB_USER}
+        - POSTGRES_PASSWORD=${DB_PASSWORD}
+        - POSTGRES_DB=${DB_DATABASE}
+        - DATABASE_URL=${DB_URL}
+      deploy:
+        replicas: 3
+        restart_policy:
+          condition: on-failure
+      ports:
+        - "5432"
+      
+volumes:
+  postgres-data:
+    driver: local
+
+

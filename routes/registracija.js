@@ -1,9 +1,9 @@
 var express = require('express');
 var router = express.Router();
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const saltRounds = 10;
 const pg = require('pg');
-
+require('dotenv').config();
 
 const config = {
     user: process.env.DB_USER,
@@ -12,25 +12,11 @@ const config = {
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
 };
-require('dotenv').config();
+
 let pool = new pg.Pool(config);
 
 const kriptujSifru = async (obicnaSifra) => {
-    return new Promise((resolve, reject) => {
-
-        bcrypt.genSalt(saltRounds, function(err, salt) {
-            if (err) reject(err);
-            bcrypt.hash(obicnaSifra, salt, function(err, hash) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(hash);
-                }
-            });
-        });
-
-    });
-
+    return bcrypt.hash(obicnaSifra, saltRounds);
 };
 
 
@@ -56,4 +42,4 @@ router.post('/', async function(req, res, next) {
 
 });
 
-module.exports = router;
+module.exports = router; 
